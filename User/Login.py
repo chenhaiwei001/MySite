@@ -13,16 +13,22 @@ def login(request):
     if user and passwd:
          #如果帐号和密码都存在，则：
         passwd_md5=md5(passwd)  #对密进行MD5加密
-        user_ORM=User.objects.filter(user__exact=user)     #查询帐号是否正确
+        user_ORM=User.objects.filter(user=user,passwd=passwd_md5)  #查询帐号和密码都相等的数据
         passwd_ORM=User.objects.filter(passwd__exact=passwd_md5)  #查询密码是否正确
 
-
         #判断帐号和密码是否正确
-        if user_ORM and passwd_ORM:
-            #更新登陆时间
-            User.objects.filter(user__exact=user).update(LoginTime=LoginTime1)
-            uid=User.objects.filter(user__exact=user).values('uid')
-            return HttpResponse(uid)
+        if user_ORM:
+            Status = User.objects.filter(user__exact=user).values('status')
+            print(Status)
+            return HttpResponse(Status)
+            # if status == 0:
+            #     #更新登陆时间
+            #     User.objects.filter(user__exact=user).update(LoginTime=LoginTime1)
+            #     uid=User.objects.filter(user__exact=user).values('uid')
+            #     return HttpResponse(uid)
+            # else:
+            #     return HttpResponse("error,Account number exception!")
+
         else:
             return HttpResponse("error,Account number or password error!")
 
