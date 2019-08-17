@@ -14,22 +14,25 @@ def login(request):
          #如果帐号和密码都存在，则：
         passwd_md5=md5(passwd)  #对密进行MD5加密
         user_ORM=User.objects.filter(user=user,passwd=passwd_md5)  #查询帐号和密码都相等的数据
-        passwd_ORM=User.objects.filter(passwd__exact=passwd_md5)  #查询密码是否正确
 
         #判断帐号和密码是否正确
         if user_ORM:
-            Status = User.objects.filter(user__exact=user).values('status')
-            print(Status)
-            return HttpResponse(Status)
-            # if status == 0:
-            #     #更新登陆时间
-            #     User.objects.filter(user__exact=user).update(LoginTime=LoginTime1)
-            #     uid=User.objects.filter(user__exact=user).values('uid')
-            #     return HttpResponse(uid)
-            # else:
-            #     return HttpResponse("error,Account number exception!")
+            #获取用户的所有数据
+            Stuts=user_ORM.values() #获取用户的信息(返回数组)
+            status=Stuts[0]  #将用户信息转换为字典
+            #判断帐号是否为正常状态，0为正常状态
+            if status['status'] == 0:
+                User.objects.filter(user__exact=user).update(LoginTime=LoginTime1) #更新登陆时间
+                uid=User.objects.filter(user__exact=user).values('uid')  #查询用户id
+                return HttpResponse(uid) #返回用户id
+
+
+            else:
+                # 如果帐号被冻结则返回错误提示
+                return HttpResponse("error,Account number exception!")
 
         else:
+            #如果帐号密码不正确,则返回错误提示
             return HttpResponse("error,Account number or password error!")
 
     #帐号和密码为空则返回错误
