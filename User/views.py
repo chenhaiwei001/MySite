@@ -14,7 +14,6 @@ def register(request):
    email=request.POST.get("email")     #获取邮箱，选填参数
    CreateTime=int(time.time())         #获取当前时间戳
 
-
    #判断用户名及密码是否为空
    if user and passwd:
        #如果用户名和密码不为空则：
