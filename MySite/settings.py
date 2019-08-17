@@ -56,11 +56,11 @@ DATABASES = {
 
         'ENGINE': 'django.db.backends.mysql',  # 配置使用mysql
 
-        'HOST': "192.168.244.128",  # 数据库ip，本地直接用localhost
+        'HOST': "111.67.196.17",  # 数据库ip，本地直接用localhost
 
         'USER': "root",  # 用户名
 
-        'PASSWORD': "admin",  # 密码
+        'PASSWORD': "bai940126",  # 密码
 
         'PORT': 3306,  # 数据库端口
 

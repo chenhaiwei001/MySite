@@ -14,14 +14,15 @@ def register(request):
    email=request.POST.get("email")     #获取邮箱，选填参数
    CreateTime=int(time.time())         #获取当前时间戳
 
+
    #判断用户名及密码是否为空
-   if not all([user,passwd]):
+   if user and passwd:
        #如果用户名和密码不为空则：
        user_ORM= User.objects.filter(user__exact=user)  # 查询user是否在表中
        passwd_md5=md5(passwd)                           #对密码进行MD5加密
 
-       #判断用户是否被注册
-       if user_ORM is None:
+          #判断用户是否被注册
+       if  not user_ORM :
            #如果没有注册则写入数据并保存
            DATA=User(
                user=user,
@@ -40,7 +41,7 @@ def register(request):
 
    else:
        #如果传入的用户名或密码为空时则返回以下信息：
-       return HttpResponse("error,User name or password is empty")
+       return HttpResponse("error,User name or password is empty！！！")
 
 
 
