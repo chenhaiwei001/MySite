@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse,JsonResponse
 from User.models import User  #导入用户表
 from User.libs.Md5 import md5  #MD5加密
 
@@ -20,12 +20,12 @@ def change(request):
              if USER:     #判断用户是否存在
 
                 USER.update(passwd=passwdnew_MD5)  #更改密码
-                return HttpResponse("Success,Successful revision!")    #返回成功的提示
+                return JsonResponse({"Success":"Successful revision!"})    #返回成功的提示
 
              else:   #查询不到帐号密码一致的用户信息，则返回
-                return HttpResponse("Error,User does not exist!")
+                return JsonResponse({"Error":"User does not exist!"})
          else:    #传入密码为空则返回
-             return HttpResponse("Error,The password is error!")
+             return JsonResponse({"Error":"The password is error!"})
      else:
         #传入帐号和uid为空则返回错误提示
-        return HttpResponse("Error,The user and uid is empty!")
+        return JsonResponse({"Error":"The user and uid is empty!"})
