@@ -1,0 +1,95 @@
+<html>
+  <head>
+    <title>pubtest</title>
+    <style>
+      .algin {
+        text-align: center
+      }
+    </style>
+  </head>
+  <body>
+    <div class="algin">
+      <button id="light1" style="width: 100px;height: 100px">开灯</button>
+      <button id="light2" style="width: 100px;height: 100px">关灯</button>
+    </div>
+    <script src="./mqtt.min.js"></script>
+    <script src="./md5.min.js"></script>
+    <script src="./jquery.js"></script>
+    <script>
+
+      $(function () {
+        // base64操作类
+        let Base64 = {
+          encode(str) {
+            return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+              function toSolidBytes(match, p1) {
+                return String.fromCharCode('0x' + p1);
+              }));
+          },
+          decode(str) {
+            return decodeURIComponent(atob(str).split('').map(function (c) {
+              return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+          }
+        };
+        $('#light1').click(function (e) {
+          sendEmqxMsg(1);
+        });
+
+        $('#light2').click(function (e) {
+          sendEmqxMsg(0);
+        });
+
+        function sendEmqxMsg(funType) {
+          // 模拟APP向设备发送消息
+          var appId = '326';
+          var appSecret = 'c0114a5be10bd8b2e1e5a3006739c499';
+          var type = 'app';
+          var account = appId;
+          var time = (new Date().getTime() + '').substr(0, 10);
+          var signature = md5(Base64.encode(type + account + appSecret + time)).toUpperCase();
+          $.post('http://192.168.21.22:83/EmqxApi/getEmqxAccessToken', {
+            'type': type,
+            'account': account,
+            'time': time,
+            'signature': signature
+          }, function (data) {
+            data = JSON.parse(data);
+            // 连接EMQX
+            const options = {
+              clean: false, // 保留回话
+              connectTimeout: 4000, // 超时时间       
+              clientId: 'pub'+Math.random().toString(36).slice(-8)+(new Date().getTime() + ''),
+              username: account,
+              password: data.data.accessToken,
+            }
+            try {
+              var client = mqtt.connect('ws://192.168.199.50:8083/mqtt', options) // you add a ws:// url here
+              var sendData = { "deviceCode": "e6a26b401daa0cbe989853593fffb9db", "userId": 2477495, "type": "operateDevice", "data": [{ "fun_name": "灯-开关", "fun_flag": "floodlight_switch", "trans_type": 3, "data_type": 3, "data_value": "[0,1]", "final_data": funType }], "return": 0 };
+              client.publish("pubTopicForApp", JSON.stringify(sendData));
+              if (funType == 1) {
+                $("#light1").css({ "background": "green" });
+                $("#light2").css({ "background": "" });
+              }
+              if (funType == 0) {
+                $("#light2").css({ "background": "red" });
+                $("#light1").css({ "background": "" });
+              }
+              console.log('发布完成！');
+              client.on('error', (err) => {
+                console.error(err);
+              });
+              client.on('reconnect', (error) => {
+                // console.log('正在重连: 关闭连接');
+                client.end();
+              });
+            } catch (ex) {
+              console.log(`ThingsBoard Error : ${ex}`);
+            }
+          });
+        }
+      });
+
+    </script>
+  </body>
+</html>
